@@ -1,0 +1,35 @@
+from netmiko import ConnectHandler
+from netmiko.ssh_exception import  NetMikoTimeoutException
+import getpass
+
+SW_IP = input ("Enter device IP ADD :")
+user = input ("username:")
+mypass = getpass.getpass()
+
+commands = ["sh ip int br | in up" , "sh cdp ne" , "sh vl br" , "sh version" , "sh sw"]
+#commands = commands.rstrip()
+
+
+SW = {
+  "device_type":"cisco_ios",
+  "ip":SW_IP,
+  "username":user,
+  "password":mypass
+}
+
+try:
+    net_connect = ConnectHandler(**SW)
+    net_connect.enable()
+
+    for line in commands:
+        output =  net_connect.send_command(line)
+        print(output)
+
+except (NetMikoTimeoutException):
+    print(' Device {} Is not reachable'.format(SW_IP))
+
+
+#for line in commands:
+#       output =  net_connect.send_command(line)
+#       print(output)
+
