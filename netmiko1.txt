@@ -2,34 +2,50 @@ from netmiko import ConnectHandler
 from netmiko.ssh_exception import  NetMikoTimeoutException
 import getpass
 
-SW_IP = input ("Enter device IP ADD :")
-user = input ("username:")
-mypass = getpass.getpass()
+while True :
 
-commands = ["sh ip int br | in up" , "sh cdp ne" , "sh vl br" , "sh version" , "sh sw"]
+### Enter the SW IP Add and your Credentials
+
+    #SW_IP = input ("Enter device IP ADD :")
+    SW_LIST = []
+    user = input ("username:")
+    mypass = getpass.getpass()
+    with open('IP_ADD.txt') as f:
+        SW_LIST = f.read().splitlines()
+
+#### Commands to be run in the Desired SW
+
+    commands = ["sh ip int br | in up" , "sh cdp ne" , "sh vl br" , "sh version" , "sh sw"]
 #commands = commands.rstrip()
 
+### SW attributes to be used by Netmiko Module
 
-SW = {
-  "device_type":"cisco_ios",
-  "ip":SW_IP,
-  "username":user,
-  "password":mypass
-}
+    for SW_IP in SW_LIST :
+        SW = {
+          "device_type":"cisco_ios",
+          "ip":SW_IP,
+          "username":user,
+          "password":mypass
+        }
 
-try:
-    net_connect = ConnectHandler(**SW)
-    net_connect.enable()
-
-    for line in commands:
-        output =  net_connect.send_command(line)
-        print(output)
-
-except (NetMikoTimeoutException):
-    print(' Device {} Is not reachable'.format(SW_IP))
+#### Try if the IP is reachable or no if not the script pop-up and error message
+        try:
+            net_connect = ConnectHandler(**SW)
+            net_connect.enable()
+### loop inside the command list to run every show commmand and print it out
 
 
-#for line in commands:
-#       output =  net_connect.send_command(line)
-#       print(output)
+            for line in commands:
+                output =  net_connect.send_command(line)
+                print(output)
 
+        except (NetMikoTimeoutException):
+            print(' Device {} Is not reachable'.format(SW_IP))
+
+
+    END_Task = input ("Do you want to continue , (if Yes please press Y otherwise N)")
+    if END_Task == "y":
+           continue
+
+    else:
+           exit()
